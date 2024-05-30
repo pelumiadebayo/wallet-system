@@ -41,6 +41,8 @@ export const validateTransaction = [
     .isLength({ max: 10, min: 10 })
     .withMessage('Account number is invalid'),
   body('amount')
+    .notEmpty()
+    .withMessage('amount is required')
     .isFloat({ gt: 0 })
     .withMessage('Amount must be a number greater than 0')
 ];

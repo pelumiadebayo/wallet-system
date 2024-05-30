@@ -6,7 +6,6 @@ import { retryWithTimeout } from '../utils/retryWithTimeout';
 const DAILY_LIMIT = 10000; //  daily limit
 const PER_TRANSACTION_LIMIT = 5000; // per-transaction limit
 
-
 export class WalletService {
 
     async createWallet(userId: string, name: string) {
@@ -42,23 +41,17 @@ export class WalletService {
 
     async creditWallet(accountNumber: string, amount: number) {
         return retryWithTimeout(async () => {
-
             const session = await mongoose.startSession();
             session.startTransaction();
 
             try {
-                const wallet = await Wallet.findOneAndUpdate(
-                    { accountNumber },
-                    { $inc: { balance: +amount, version: 1 } },
-                    { new: true }
-                ).session(session);
+                const wallet = await this.findAndUpdateWallet(accountNumber,+amount,session)
 
-                if (!wallet) throw new Error('Wallet not found');
+                await this.findAndUpdateTransaction(wallet.id, "credit", +amount, session)
 
-                await Transaction.create([{ type: 'credit', amount, walletId: wallet._id }], { session });
                 await wallet.save({ session });
-
                 await session.commitTransaction();
+
                 return {walletBalance:wallet.balance, owner:wallet.name, accountNumber:wallet.accountNumber};
 
             } catch (error) {
@@ -81,40 +74,21 @@ export class WalletService {
             session.startTransaction();
 
             try {
-                const wallet = await Wallet.findOneAndUpdate(
-                    { accountNumber, balance: { $gte: amount } },
-                    { $inc: { balance: -amount, version: 1 } },
-                    { new: true }
-                ).session(session);
-
-                if (!wallet) throw new Error('Wallet not found');
-                if (wallet.balance < amount) throw new Error('Insufficient balance');
-
-                let walletId = wallet._id;
-
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const dailyTransactions = await Transaction.find({
-                    walletId,
-                    type: 'debit',
-                    createdAt: { $gte: today }
-                }).session(session);
+                const updatedWallet = await this.findAndUpdateWallet(accountNumber,-amount,session)
+                const initialWalletBalance = updatedWallet.balance+amount;
+                if (initialWalletBalance < amount) throw new Error('Insufficient balance');
                 
-                // Check daily limit
-                const dailyTotal = dailyTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-                if (dailyTotal + amount > DAILY_LIMIT) {
-                throw new Error(`Transaction exceeds daily limit of ${DAILY_LIMIT}`);
-                }
+                await this.findAndUpdateTransaction(updatedWallet.id, "debit", amount, session)
 
-                await Transaction.create([{ type: 'debit', amount, walletId: wallet._id }], { session });
-                await wallet.save({ session });
-
+                await updatedWallet.save({ session });
                 await session.commitTransaction();
-                return {walletBalance:wallet.balance, owner:wallet.name, accountNumber:wallet.accountNumber};
+
+                return {walletBalance:updatedWallet.balance, owner:updatedWallet.name, accountNumber:updatedWallet.accountNumber};
 
             } catch (error) {
                 await session.abortTransaction();
                 throw error;
+
             } finally {
                 session.endSession();
             }
@@ -132,5 +106,34 @@ export class WalletService {
 
         }, 3, 500, 2, 3000);
     }
+
+    async findAndUpdateWallet(accountNumber: string, amount: number, session: mongoose.mongo.ClientSession){
+        const wallet = await Wallet.findOneAndUpdate(
+            { accountNumber },
+            { $inc: { balance: amount, version: 1 } },
+            { new: true }
+        ).session(session);
+
+        if (!wallet) throw new Error('Wallet not found');
+        return wallet;
+    } 
   
+    async findAndUpdateTransaction(walletId: string, type: string, amount: number, session: mongoose.mongo.ClientSession){
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Find or create the daily transaction record for the given date, walletId, and type
+        const filter = { createdAt: { $gte: today }, walletId, type };
+        const update = { $inc: { amount: +amount } };
+        const options = { upsert: true, new: true };
+
+        const dailyTransactions = await Transaction.findOneAndUpdate(filter, update, options).session(session);
+
+        // Check daily limit
+        if (dailyTransactions && type === "debit" && dailyTransactions.amount > DAILY_LIMIT)
+        {
+            throw new Error(`Transaction exceeds daily limit of ${DAILY_LIMIT}`);
+        }
+        await dailyTransactions?.save({ session });
+    }
 }

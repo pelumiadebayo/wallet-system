@@ -17,10 +17,9 @@ const walletSchema: Schema = new Schema({
   userId: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
   balance: { type: Number, required: true, default: 0 },
   name: { type: String, required: true },
-  version: { type: Number, default: 0 },
 }, {
   timestamps: true,
+  versionKey: 'version'
 });
 
-  
 export const Wallet = model<IWallet>('Wallet', walletSchema);

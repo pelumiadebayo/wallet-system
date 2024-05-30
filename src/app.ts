@@ -1,7 +1,7 @@
 import express from 'express';
 import router from './routes/walletRoutes';
 import dotenv from 'dotenv';
-import { notFoundMiddleware } from './middleware/notFoundMiddleware';
+import { notFoundMiddleware } from './middlewares/notFoundMiddleware';
 
 dotenv.config();
 
