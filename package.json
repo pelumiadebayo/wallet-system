@@ -9,7 +9,7 @@
     "dev": "ts-node src/server.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Pelumi Adebayo",
   "license": "ISC",
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
