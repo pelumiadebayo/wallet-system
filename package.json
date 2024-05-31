@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prestart": "npm install",
     "build": "tsc",
     "start": "tsc && node dist/server.js",
     "dev": "ts-node src/server.ts"
