@@ -10,17 +10,29 @@ Cloning and Running the Project
 *   MongoDB (preferably running in replica set mode)
     
 *   Git
-    
 
 ### Steps to Clone and Run
 
-1.  git clone [this repo](https://github.com/pelumiadebayo/wallet-system.git)
+1.  **Clone the Repository**
+
+    > `git clone https://github.com/pelumiadebayo/wallet-system.git 
+    > cd your-repo-name`
     
-2.  run npm install
+2.  **Install Dependencies**
+
+    > `npm install`
+ 
+3.  **Set Up Environment Variables**
     
-3.  Create a .env file in the root directory and add the following variables: PORT=3000MONGODB\_URI=mongodb://localhost:27017/wallet-system-dbJWT\_SECRET=your\_jwt\_secret
-    
-4.  npm run dev
+    Create a `.env` file in the root directory and add the following variables:
+
+    > MONGODB_URI=mongodb://localhost:27017/wallet-system
+    > JWT_SECRET=your_jwt_secret
+    > PORT=3000
+   
+4.  **Run the Application**
+
+    > `npm start`
     
 5.  You can test the API endpoints using Postman. The Postman collection can be found [here](https://github.com/).
     
