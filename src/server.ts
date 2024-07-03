@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import app from './index';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/walletdb'
 if (!uri) {
