@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, application } from 'express';
 import { createWallet, creditWallet, debitWallet, getBalance  } from '../controllers/walletController';
 import {validateRegistration, validateLogin, validateTransaction } from '../validators/walletValidators';
 import { handleValidationErrors } from '../validators/errorHandler';
@@ -10,6 +10,9 @@ import { authMiddleware } from '../middlewares/authMiddleware';
 const router = Router();
 
 // Auth routes
+router.get('/', (req, res) => {
+  res.send('Welcome to my Wallet system!');
+});
 router.post('/register', validateRegistration, handleValidationErrors, exceptionHandlerMiddleware(register));
 router.post('/login', validateLogin, handleValidationErrors, exceptionHandlerMiddleware(login));
 
