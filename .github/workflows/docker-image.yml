@@ -47,5 +47,5 @@ jobs:
           uses: actions/attest-build-provenance@v1
           with:
             subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/wallet-system
-            subject-digest: ${{ steps.meta.outputs.digest }}
+            # subject-digest: ${{ steps.meta.outputs.digest }}
             push-to-registry: true
