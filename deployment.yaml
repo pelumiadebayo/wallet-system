@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wallet-system
+  labels:
+        app: wallet-system
+spec:
+  replicas: 1  # Number of desired replicas
+  selector:
+    matchLabels:
+      app: wallet-system
+  template:
+    metadata:
+      labels:
+        app: wallet-system
+    spec:
+      containers:
+      - name: wallet-system
+        image: docker.io/sapphire001/wallet-system:main
+        ports:
+        - containerPort: 3000
