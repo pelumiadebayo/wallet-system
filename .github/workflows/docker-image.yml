@@ -43,15 +43,15 @@ jobs:
             docker-compose build
             docker-compose push
 
-        - name: Get image digest
-          id: get_digest
-          run: |
-            IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ secrets.DOCKER_USERNAME }}/wallet-system:latest | cut -d'@' -f2)
-            echo "IMAGE_DIGEST=${IMAGE_DIGEST}" >> $GITHUB_ENV
+        # - name: Get image digest
+        #   id: get_digest
+        #   run: |
+        #     IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ secrets.DOCKER_USERNAME }}/wallet-system:latest | cut -d'@' -f2)
+        #     echo "IMAGE_DIGEST=${IMAGE_DIGEST}" >> $GITHUB_ENV
 
-        - name: Generate artifact attestation
-          uses: actions/attest-build-provenance@v1
-          with:
-            subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/wallet-system
-            subject-digest: ${{ env.IMAGE_DIGEST }}
-            push-to-registry: true
+        # - name: Generate artifact attestation
+        #   uses: actions/attest-build-provenance@v1
+        #   with:
+        #     subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/wallet-system
+        #     subject-digest: ${{ env.IMAGE_DIGEST }}
+        #     push-to-registry: true
